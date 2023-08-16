@@ -1,5 +1,6 @@
 import Questions from "../models/Questions.js";
 import mongoose from "mongoose";
+import users from "../models/auth.js";
 
 export const AskQuestion = async (req, res) => {
   const postQuestionData = req.body;
@@ -78,8 +79,45 @@ export const voteQuestion = async (req, res) => {
       }
     }
     await Questions.findByIdAndUpdate(_id, question);
+    await updateRewardPoints(_id);
     res.status(200).json({ message: "voted successfully..." });
   } catch (error) {
     res.status(404).json({ message: "id not found" });
+  }
+};
+
+export const updateRewardPoints = async (_id) => {
+  let totalUpvotes = 0;
+  try {
+    const quest = await Questions.find();
+    const allquestion = [];
+    quest.forEach((ques) => {
+      allquestion.push({
+        userId: ques.userId,
+        upVote: ques.upVote.length,
+        downVote: ques.downVote.length,
+      })
+    })
+    try {
+      const questionId = await Questions.findById(_id);
+      const question = allquestion.filter((q) => q.userId === questionId.userId)
+      question.map((Q) => {
+        const votes = Q.upVote - Q.downVote;
+        if (votes > 0) {
+          totalUpvotes += votes;
+        }
+      });
+      const user = users.findById(questionId.userId);
+      if (user.rewardPoints > totalUpvotes) {
+        totalUpvotes = user.rewardPoints;
+      }
+      await users.findByIdAndUpdate(questionId.userId, {
+        $set: { rewardPoints: totalUpvotes },
+      });
+    } catch (error) {
+      console.log(error + " uploading reward data");
+    }
+  } catch (error) {
+    console.log(error + " 404");
   }
 };

@@ -11,7 +11,11 @@ export const getAllUsers = async (req, res) => {
         name: user.name,
         about: user.about,
         tags: user.tags,
+        noOfAnswer:user.noOfAnswers,
         joinedOn: user.joinedOn,
+        points:user.rewardPoints,
+        totalBadges:user.badges,
+        loginInformation: user.loginInformation,
       });
     });
     res.status(200).json(allUserDetails);
