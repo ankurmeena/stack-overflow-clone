@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon index.js",
+    "server": "node index.js",
+    "build": "npm install"
   },
   "author": "ankur meena",
   "license": "ISC",
